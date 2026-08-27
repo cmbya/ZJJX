@@ -1,4 +1,18 @@
-import { extractSourceUrls } from "../lib/source-url.mjs";
+function extractSourceUrls(value) {
+  if (typeof value !== "string") return [];
+  const pattern = /https?:\/\/[^\s<>"'“”‘’，。！？；：、）】》」』]+/giu;
+  const trailing = /[),.;!?，。！？；：、）】》」』]+$/u;
+  const urls = [];
+  const seen = new Set();
+  for (const match of value.matchAll(pattern)) {
+    const url = match[0].replace(trailing, "");
+    if (!seen.has(url)) {
+      seen.add(url);
+      urls.push(url);
+    }
+  }
+  return urls;
+}
 
 const BASE = "/app/ZJJX";
 const $ = (selector) => document.querySelector(selector);
