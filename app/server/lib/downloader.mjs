@@ -122,7 +122,7 @@ export async function downloadMedia(media, taskId, config, apiEndpoint, onProgre
       const result = await downloadOne(media.imageUrls[i], destination, config, apiEndpoint, "images", (bytes) => onProgress?.({ completed: i, total: media.imageUrls.length, bytes: totalBytes + bytes }));
       totalBytes += result.bytes;
       savedPaths.push(path.relative(root, destination));
-      onProgress?.({ completed: i + 1, total: media.imageUrls.length, bytes: totalBytes });
+      await onProgress?.({ completed: i + 1, total: media.imageUrls.length, bytes: totalBytes });
     }
   } else {
     const destination = await uniquePath(fs, directory, title, ".mp4");
@@ -131,7 +131,7 @@ export async function downloadMedia(media, taskId, config, apiEndpoint, onProgre
     if (!validation.ok) { await fs.rm(destination, { force: true }); throw new Error(`视频校验失败：${validation.reason}`); }
     totalBytes = result.bytes;
     savedPaths.push(path.relative(root, destination));
-    onProgress?.({ completed: 1, total: 1, bytes: totalBytes });
+    await onProgress?.({ completed: 1, total: 1, bytes: totalBytes });
   }
   return { savedPaths, bytes: totalBytes };
 }
