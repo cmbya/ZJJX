@@ -14,7 +14,7 @@ import { errorDetails, log, safeUrl } from "./lib/logger.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, "public");
-const PREFIX = "/app/zjjx";
+const PREFIX = "/app/ZJJX";
 const previews = new Map();
 const queue = new DownloadQueue();
 
