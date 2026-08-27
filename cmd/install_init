@@ -2,6 +2,5 @@
 set -eu
 
 # fnOS 已经会依据 manifest.platform=x86 做平台兼容性检查。
-# 不在这里再次假设 TRIM_SYS_ARCH 的具体字符串，避免把合法的 x86
-# 设备（例如返回 x86 的 J4125 设备）误判为不兼容。
-printf '%s\n' "ZJJX 安装架构：${TRIM_SYS_ARCH:-unknown}" > "${TRIM_TEMP_LOGFILE:-/tmp/zjjx-install.log}"
+# 安装阶段不写 TRIM_TEMP_LOGFILE；该文件只用于报告失败原因。
+exit 0
