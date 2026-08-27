@@ -8,7 +8,8 @@ LOG_FILE="${PKGVAR}/zjjx.log"
 PID_FILE="${PKGVAR}/zjjx.pid"
 ERROR_FILE="${TRIM_TEMP_LOGFILE:-}"
 SOCKET_PATH="${APPDEST:+${APPDEST}/app.sock}"
-APP_DIR="${APPDEST:+${APPDEST}/app/server}"
+# fnOS 的 TRIM_APPDEST 指向安装后的 target 目录；源码中的 app/ 会被去掉。
+APP_DIR="${APPDEST:+${APPDEST}/server}"
 
 mkdir -p "$PKGVAR" 2>/dev/null || true
 
