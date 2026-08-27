@@ -1,4 +1,4 @@
-const BASE = "/app/zjjx";
+const BASE = "/app/ZJJX";
 const $ = (selector) => document.querySelector(selector);
 let previewToken = "";
 let downloadDirectoryConfigured = false;
