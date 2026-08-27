@@ -1,6 +1,7 @@
 const BASE = "/app/zjjx";
 const $ = (selector) => document.querySelector(selector);
 let previewToken = "";
+let downloadDirectoryConfigured = false;
 
 async function request(path, options = {}) {
   const response = await fetch(`${BASE}${path}`, { headers: { "content-type": "application/json", ...(options.headers || {}) }, ...options });
@@ -27,6 +28,7 @@ function showPage(page) {
 async function loadHealth() {
   try {
     const data = await request("/api/health");
+    downloadDirectoryConfigured = data.downloadDirectoryConfigured;
     $("#health").innerHTML = `<div><strong>管理员校验通过</strong><span class="muted"> API Key：${data.apiKeyConfigured ? "已配置" : "未配置"}　下载目录：${data.downloadDirectoryConfigured ? "已授权" : "未授权"}</span></div>${!data.apiKeyConfigured || !data.downloadDirectoryConfigured ? '<div class="warning">请先到飞牛应用设置完成配置。</div>' : ""}`;
   } catch (error) { $("#health").innerHTML = `<strong class="error">${escapeHtml(error.message)}</strong>`; }
 }
@@ -36,7 +38,7 @@ function renderPreview(data) {
   previewToken = data.previewToken;
   const image = media.thumbnail ? `<img class="cover" src="${escapeHtml(media.thumbnail)}" alt="封面" referrerpolicy="no-referrer">` : `<div class="cover placeholder">ZJJX</div>`;
   $("#preview").classList.remove("hidden");
-  $("#preview").innerHTML = `${image}<div class="preview-body"><p class="eyebrow">${escapeHtml(data.parser)}</p><h2>${escapeHtml(media.title)}</h2><p class="muted">${escapeHtml(media.platform)}${media.author ? ` · ${escapeHtml(media.author)}` : ""} · ${media.mediaType === "images" ? `图片组，共 ${media.count} 张` : "视频"}</p>${media.mediaType === "images" ? `<div class="thumbs">${media.imageUrls.slice(0, 6).map((url) => `<img src="${escapeHtml(url)}" referrerpolicy="no-referrer">`).join("")}</div>` : ""}<div class="form-row"><button id="confirm-download" class="primary">确认下载</button><button id="cancel-preview" class="secondary">取消</button><span id="download-error" class="error"></span></div></div>`;
+  $("#preview").innerHTML = `${image}<div class="preview-body"><p class="eyebrow">${escapeHtml(data.parser)}</p><h2>${escapeHtml(media.title)}</h2><p class="muted">${escapeHtml(media.platform)}${media.author ? ` · ${escapeHtml(media.author)}` : ""} · ${media.mediaType === "images" ? `图片组，共 ${media.count} 张` : "视频"}</p>${media.mediaType === "images" ? `<div class="thumbs">${media.imageUrls.slice(0, 6).map((url) => `<img src="${escapeHtml(url)}" referrerpolicy="no-referrer">`).join("")}</div>` : ""}${downloadDirectoryConfigured ? "" : '<p class="warning">请先在飞牛应用设置中授权下载目录，完成授权后才能下载。</p>'}<div class="form-row"><button id="confirm-download" class="primary" ${downloadDirectoryConfigured ? "" : "disabled"}>确认下载</button><button id="cancel-preview" class="secondary">取消</button><span id="download-error" class="error"></span></div></div>`;
   $("#confirm-download").onclick = async () => {
     try { const result = await request("/api/downloads", { method: "POST", body: JSON.stringify({ previewToken }) }); previewToken = ""; $("#preview").innerHTML = `<div class="success"><strong>已加入下载队列</strong><p class="muted">任务 ${escapeHtml(result.task.id)} 正在后台处理。</p><button class="secondary" id="view-tasks">查看任务历史</button></div>`; $("#view-tasks").onclick = () => showPage("tasks"); } catch (error) { $("#download-error").textContent = error.message; }
   };

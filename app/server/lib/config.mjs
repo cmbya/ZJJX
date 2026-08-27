@@ -29,7 +29,13 @@ export async function saveConfig({ apiKey = "", webUsername = "", webPassword = 
   await fs.mkdir(dir, { recursive: true, mode: 0o700 });
   const file = path.join(dir, "config.json");
   const temporary = `${file}.tmp-${process.pid}`;
-  await fs.writeFile(temporary, `${JSON.stringify({ apiKey, webUsername, webPassword }, null, 2)}\n`, { mode: 0o600 });
+  const handle = await fs.open(temporary, "w", 0o600);
+  try {
+    await handle.writeFile(`${JSON.stringify({ apiKey, webUsername, webPassword }, null, 2)}\n`);
+    await handle.sync();
+  } finally {
+    await handle.close();
+  }
   await fs.rename(temporary, file);
   await fs.chmod(file, 0o600);
 }
