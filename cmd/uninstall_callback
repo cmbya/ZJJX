@@ -1,4 +1,6 @@
 #!/bin/sh
 set -eu
-"$TRIM_APPDEST/cmd/main" stop >/dev/null 2>&1 || true
+
+# fnOS 卸载前会负责停止应用；卸载后不再访问已经移除的 target 目录。
+exit 0
 rm -f "$TRIM_PKGETC/config.json" "$TRIM_PKGVAR/tasks.json" "$TRIM_PKGVAR/zjjx.pid" "$TRIM_PKGVAR/zjjx.log"
