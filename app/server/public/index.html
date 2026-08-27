@@ -14,14 +14,17 @@
       </header>
 
       <section id="page-parse" class="page">
-        <div class="hero"><p class="eyebrow">ADMIN ONLY</p><h1>粘贴链接，先预览再下载</h1><p class="muted">一次提交一条公开内容链接。下载前会显示平台、标题和媒体数量。</p></div>
+        <div class="hero"><p class="eyebrow">ADMIN ONLY</p><h1>批量粘贴，逐个解析</h1><p class="muted">一次最多 20 个链接。支持每行一个链接、多个链接，或包含链接的抖音分享文案。</p></div>
         <div id="health" class="status-card">正在检查配置…</div>
         <form id="resolve-form" class="card form-card">
           <label for="source-url">内容链接</label>
-          <textarea id="source-url" rows="3" placeholder="粘贴抖音、快手、Instagram 或其他解析服务支持的链接" required></textarea>
-          <div class="form-row"><button class="primary" type="submit">解析预览</button><span id="resolve-error" class="error"></span></div>
+          <textarea id="source-url" rows="5" placeholder="粘贴多个链接或完整分享文案，每个链接之间用换行或空格分隔" required></textarea>
+          <div class="form-row"><button class="primary" type="submit">开始批量解析</button><button id="clear-previews" class="secondary" type="button">清空结果</button><span id="resolve-error" class="error"></span></div>
         </form>
-        <section id="preview" class="card hidden"></section>
+        <section id="preview" class="preview-list hidden">
+          <div class="batch-toolbar"><div id="batch-summary" class="muted"></div><button id="download-all" class="primary" type="button" disabled>一键下载全部解析成功项</button></div>
+          <div id="preview-items"></div>
+        </section>
       </section>
 
       <section id="page-tasks" class="page hidden">
