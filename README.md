@@ -46,6 +46,10 @@ node app/server/index.mjs
 
 生产环境由 `cmd/main` 将服务监听到 `${TRIM_APPDEST}/app.sock`，由飞牛统一网关以 `/app/zjjx` 提供访问。
 
+### 启动失败时查看日志
+
+详细日志固定写入 `${TRIM_PKGVAR}/zjjx.log`。如果应用安装在飞牛的第 2 个存储卷，实际路径通常是 `/vol2/@appdata/ZJJX/zjjx.log`；其他卷将 `vol2` 替换为对应卷号。飞牛弹出的启动失败提示会同时显示该日志的最后 60 行。
+
 ## 安全约束
 
 API Key、网页账号和网页密码只写入 `${TRIM_PKGETC}/config.json`，文件权限为 `0600`；前端只接收布尔配置状态，日志和任务历史不会保存凭据、Cookie 或完整鉴权 Header。应用只使用管理员授权目录，下载文件采用临时 `.part` 文件完成后原子改名。
