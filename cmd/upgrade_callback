@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+mkdir -p "$TRIM_PKGETC" "$TRIM_PKGVAR"
+chmod 700 "$TRIM_PKGETC" "$TRIM_PKGVAR" 2>/dev/null || true

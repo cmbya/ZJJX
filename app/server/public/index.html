@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ZJJX</title>
+    <link rel="stylesheet" href="/app/zjjx/app.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div><span class="brand">ZJJX</span><span class="subtitle">媒体解析与下载</span></div>
+        <nav><button class="nav active" data-page="parse">解析</button><button class="nav" data-page="tasks">任务历史</button><button class="nav" data-page="settings">设置提示</button></nav>
+      </header>
+
+      <section id="page-parse" class="page">
+        <div class="hero"><p class="eyebrow">ADMIN ONLY</p><h1>粘贴链接，先预览再下载</h1><p class="muted">一次提交一条公开内容链接。下载前会显示平台、标题和媒体数量。</p></div>
+        <div id="health" class="status-card">正在检查配置…</div>
+        <form id="resolve-form" class="card form-card">
+          <label for="source-url">内容链接</label>
+          <textarea id="source-url" rows="3" placeholder="粘贴抖音、快手、Instagram 或其他解析服务支持的链接" required></textarea>
+          <div class="form-row"><button class="primary" type="submit">解析预览</button><span id="resolve-error" class="error"></span></div>
+        </form>
+        <section id="preview" class="card hidden"></section>
+      </section>
+
+      <section id="page-tasks" class="page hidden">
+        <div class="section-heading"><div><p class="eyebrow">DOWNLOAD QUEUE</p><h2>任务历史</h2></div><button id="clear-tasks" class="danger-outline">清理历史</button></div>
+        <div id="tasks" class="task-list"><div class="empty">正在加载…</div></div>
+      </section>
+
+      <section id="page-settings" class="page hidden">
+        <div class="section-heading"><div><p class="eyebrow">FNOS SETTINGS</p><h2>设置提示</h2></div></div>
+        <div class="card tips"><h3>首次使用前</h3><ol><li>在飞牛应用设置中配置解析服务 API Key。</li><li>为 ZJJX 授权一个下载目录；下载文件会保存为“日期 / 平台 / 标题”。</li><li>网页账号密码通道目前只是实验性备用入口，稳定功能以 API Key 为准。</li></ol><p class="muted">凭据保存在应用私有配置目录，前端不会读取或显示原文。</p></div>
+      </section>
+    </main>
+    <script src="/app/zjjx/app.js"></script>
+  </body>
+</html>

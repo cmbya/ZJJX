@@ -1,0 +1,13 @@
+{
+  "name": "zjjx-fnos",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ZJJX fnOS native media resolver and downloader",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test",
+    "verify": "node scripts/verify-fpk.mjs",
+    "package:app": "node scripts/package-app.mjs"
+  }
+}

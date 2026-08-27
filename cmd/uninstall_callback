@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+"$TRIM_APPDEST/cmd/main" stop >/dev/null 2>&1 || true
+rm -f "$TRIM_PKGETC/config.json" "$TRIM_PKGVAR/tasks.json" "$TRIM_PKGVAR/zjjx.pid" "$TRIM_PKGVAR/zjjx.log"

@@ -1,0 +1,99 @@
+name: Build and release FPK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version, for example 1.0.0
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zjjx-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate version
+        env:
+          VERSION: ${{ inputs.version }}
+          FNPACK_URL: ${{ vars.FNPACK_URL }}
+        run: |
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test -n "${FNPACK_URL:-}" || { echo '请先在仓库 Variables 配置 FNPACK_URL'; exit 1; }
+        shell: bash
+
+      - name: Test and validate app
+        run: |
+          npm test
+          npm run package:app
+
+      - name: Check tag and release do not exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/v${VERSION}" >/dev/null 2>&1; then
+            echo "v${VERSION} 已存在"; exit 1
+          fi
+          if gh release view "v${VERSION}" >/dev/null 2>&1; then
+            echo "Release v${VERSION} 已存在"; exit 1
+          fi
+
+      - name: Update manifest version
+        run: node scripts/release-version.mjs "${{ inputs.version }}"
+
+      - name: Download fnpack
+        env:
+          FNPACK_URL: ${{ vars.FNPACK_URL }}
+        run: |
+          curl --fail --location --retry 3 "$FNPACK_URL" --output fnpack
+          chmod +x fnpack
+          ./fnpack --help >/dev/null
+
+      - name: Build FPK
+        run: |
+          ./fnpack build --directory .
+          mapfile -t PACKAGES < <(find . -maxdepth 1 -type f -name '*.fpk' -print)
+          test "${#PACKAGES[@]}" -eq 1
+          mv "${PACKAGES[0]}" "ZJJX-${{ inputs.version }}.fpk"
+          npm run verify
+
+      - name: Commit manifest and create tag
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add manifest
+          git commit -m "chore: release v${VERSION}"
+          git push origin main
+          git tag "v${VERSION}"
+          git push origin "v${VERSION}"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: gh release create "v${VERSION}" "ZJJX-${VERSION}.fpk" --title "ZJJX v${VERSION}" --generate-notes
+
+      - name: Upload Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZJJX-${{ inputs.version }}
+          path: ZJJX-${{ inputs.version }}.fpk
+          if-no-files-found: error

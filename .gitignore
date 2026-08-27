@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.fpk
+*.log
+.env
+.env.*
+config.local.json
+test-media/
+coverage/
+tasks.json
+*.part

@@ -1,0 +1,29 @@
+[
+  {
+    "stepTitle": "ZJJX 配置",
+    "items": [
+      {
+        "type": "password",
+        "field": "wizard_api_key",
+        "label": "解析服务 API Key",
+        "rules": []
+      },
+      {
+        "type": "text",
+        "field": "wizard_web_username",
+        "label": "网页备用账号",
+        "rules": []
+      },
+      {
+        "type": "password",
+        "field": "wizard_web_password",
+        "label": "网页备用密码",
+        "rules": []
+      },
+      {
+        "type": "tips",
+        "helpText": "凭据只保存在 ZJJX 私有配置目录，不会显示在前端或写入日志。"
+      }
+    ]
+  }
+]

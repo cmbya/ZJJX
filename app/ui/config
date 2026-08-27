@@ -1,0 +1,17 @@
+{
+  ".url": {
+    "ZJJX.Application": {
+      "title": "ZJJX",
+      "icon": "images/icon_{0}.png",
+      "type": "iframe",
+      "protocol": "",
+      "gatewayPrefix": "/app/zjjx",
+      "gatewaySocket": "app.sock",
+      "url": "/app/zjjx",
+      "allUsers": false,
+      "control": {
+        "accessPerm": "readonly"
+      }
+    }
+  }
+}

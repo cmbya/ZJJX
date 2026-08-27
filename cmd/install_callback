@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+mkdir -p "$TRIM_PKGETC" "$TRIM_PKGVAR"
+export PATH="/var/apps/nodejs_v22/target/bin:${PATH:-}"
+node "$TRIM_APPDEST/app/server/lib/config.mjs" write
+chmod 700 "$TRIM_PKGETC" "$TRIM_PKGVAR" 2>/dev/null || true
+chmod 600 "$TRIM_PKGETC/config.json" 2>/dev/null || true

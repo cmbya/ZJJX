@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+if [ "${TRIM_SYS_ARCH:-x86_64}" != "x86_64" ] && [ "${TRIM_SYS_ARCH:-x86_64}" != "amd64" ]; then
+  printf '%s\n' "ZJJX 首版仅支持 x86_64/amd64 飞牛设备。" > "${TRIM_TEMP_LOGFILE:-/tmp/zjjx-install.log}"
+  exit 1
+fi
