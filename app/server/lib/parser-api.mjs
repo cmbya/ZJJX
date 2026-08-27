@@ -1,4 +1,5 @@
 const DEFAULT_ENDPOINT = "https://jx.wxss.dpdns.org/api/shortcut/resolve";
+import { errorDetails, log, safeUrl } from "./logger.mjs";
 
 function withTimeout(ms) {
   const controller = new AbortController();
@@ -15,6 +16,7 @@ export async function resolveViaApi(targetUrl, config) {
     throw error;
   }
   const endpoint = process.env.ZJJX_API_ENDPOINT || DEFAULT_ENDPOINT;
+  log("INFO", "parser_request_start", { source: safeUrl(targetUrl), endpoint: safeUrl(endpoint), timeoutMs: Number(process.env.ZJJX_REQUEST_TIMEOUT_MS || 30000) });
   const timeout = withTimeout(Number(process.env.ZJJX_REQUEST_TIMEOUT_MS || 30000));
   let response;
   try {
@@ -25,6 +27,7 @@ export async function resolveViaApi(targetUrl, config) {
       body: JSON.stringify({ url: targetUrl, quality: "hd", format: "video" })
     });
   } catch (error) {
+    log("ERROR", "parser_request_network_failed", { source: safeUrl(targetUrl), endpoint: safeUrl(endpoint), error: errorDetails(error) });
     const wrapped = new Error(error.name === "AbortError" ? "解析服务请求超时" : "无法连接解析服务");
     wrapped.code = error.name === "AbortError" ? "PARSER_TIMEOUT" : "PARSER_NETWORK";
     wrapped.status = 502;
@@ -33,6 +36,7 @@ export async function resolveViaApi(targetUrl, config) {
     timeout.clear();
   }
   const text = await response.text();
+  log("INFO", "parser_response", { source: safeUrl(targetUrl), endpoint: safeUrl(endpoint), status: response.status, bodyBytes: Buffer.byteLength(text) });
   let payload;
   try { payload = JSON.parse(text); } catch {
     const error = new Error(`解析服务返回了无效 JSON（HTTP ${response.status}）`);
@@ -52,6 +56,7 @@ export async function resolveViaApi(targetUrl, config) {
     error.status = 422;
     throw error;
   }
+  log("INFO", "parser_request_success", { source: safeUrl(targetUrl), endpoint: safeUrl(endpoint), keys: Object.keys(payload).slice(0, 20) });
   return payload;
 }
 
