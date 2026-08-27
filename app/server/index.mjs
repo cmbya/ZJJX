@@ -10,6 +10,7 @@ import { resolveViaWebFallback } from "./lib/parser-web-fallback.mjs";
 import { normalizeMedia } from "./lib/media-normalizer.mjs";
 import { DownloadQueue } from "./lib/download-queue.mjs";
 import { initTaskStore, createTask, listTasks, getTask, clearTasks } from "./lib/task-store.mjs";
+import { errorDetails, log, safeUrl } from "./lib/logger.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, "public");
@@ -97,12 +98,14 @@ function prunePreviews() {
 
 async function resolve(body, user) {
   const sourceUrl = validateInputUrl(body.url);
+  log("INFO", "resolve_start", { source: safeUrl(sourceUrl), user: user.username });
   const config = await loadConfig();
   let raw;
   let parser = "api-key";
   try {
     raw = await resolveViaApi(sourceUrl, config);
   } catch (apiError) {
+    log("WARN", "resolve_api_failed", { source: safeUrl(sourceUrl), error: errorDetails(apiError) });
     if (!config.webUsername || !config.webPassword) throw apiError;
     parser = "web-fallback-experimental";
     raw = await resolveViaWebFallback(sourceUrl, config);
@@ -110,6 +113,7 @@ async function resolve(body, user) {
   const media = normalizeMedia(raw, sourceUrl);
   const token = crypto.randomBytes(32).toString("base64url");
   previews.set(token, { userId: user.uid, media, parser, expiresAt: Date.now() + 30 * 60 * 1000 });
+  log("INFO", "resolve_success", { source: safeUrl(sourceUrl), parser, mediaType: media.mediaType, count: media.count });
   return { previewToken: token, parser, expiresInSeconds: 1800, media: publicMedia(media) };
 }
 
@@ -174,16 +178,41 @@ async function handle(req, res) {
   return json(res, 404, { ok: false, error: "接口不存在", code: "NOT_FOUND" });
 }
 
-await initTaskStore();
-const server = http.createServer((req, res) => {
-  handle(req, res).catch((error) => errorResponse(res, error));
+log("INFO", "service_boot", {
+  node: process.version,
+  pid: process.pid,
+  appDest: process.env.TRIM_APPDEST || "",
+  configDir: process.env.TRIM_PKGETC || process.env.ZJJX_CONFIG_DIR || "",
+  varDir: process.env.TRIM_PKGVAR || process.env.ZJJX_VAR_DIR || "",
+  systemArch: process.env.TRIM_SYS_ARCH || "unknown"
 });
+try {
+  await initTaskStore();
+  log("INFO", "task_store_ready");
+} catch (error) {
+  log("ERROR", "task_store_init_failed", { error: errorDetails(error) });
+  throw error;
+}
+
+const server = http.createServer((req, res) => {
+  const startedAt = Date.now();
+  const requestPath = routePath(req);
+  log("INFO", "request_start", { method: req.method, path: requestPath });
+  res.on("finish", () => log("INFO", "request_end", { method: req.method, path: requestPath, status: res.statusCode, durationMs: Date.now() - startedAt }));
+  handle(req, res).catch((error) => {
+    log("ERROR", "request_failed", { method: req.method, path: requestPath, error: errorDetails(error) });
+    errorResponse(res, error);
+  });
+});
+server.on("error", (error) => log("ERROR", "server_error", { error: errorDetails(error) }));
 const socketPath = process.env.SOCKET_PATH || (process.env.TRIM_APPDEST ? path.join(process.env.TRIM_APPDEST, "app.sock") : "");
 if (socketPath) {
   await fs.rm(socketPath, { force: true });
-  server.listen(socketPath);
+  server.listen(socketPath, () => log("INFO", "service_listening", { transport: "unix", socketPath }));
 } else {
-  server.listen(Number(process.env.PORT || 12147), process.env.HOST || "127.0.0.1");
+  const port = Number(process.env.PORT || 12147);
+  const host = process.env.HOST || "127.0.0.1";
+  server.listen(port, host, () => log("INFO", "service_listening", { transport: "tcp", host, port }));
 }
 
 function shutdown() {
