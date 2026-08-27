@@ -11,6 +11,7 @@ import { normalizeMedia } from "./lib/media-normalizer.mjs";
 import { DownloadQueue } from "./lib/download-queue.mjs";
 import { initTaskStore, createTask, listTasks, getTask, clearTasks } from "./lib/task-store.mjs";
 import { errorDetails, log, safeUrl } from "./lib/logger.mjs";
+import { extractSourceUrl } from "./lib/source-url.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, "public");
@@ -69,14 +70,15 @@ function publicMedia(media) {
 }
 
 function validateInputUrl(value) {
-  if (typeof value !== "string" || value.trim().length < 8 || value.length > 4096) {
+  const extracted = extractSourceUrl(value);
+  if (extracted.length < 8 || extracted.length > 4096) {
     const error = new Error("请输入一条有效的公开内容链接");
     error.status = 400;
     error.code = "INVALID_SOURCE_URL";
     throw error;
   }
   let url;
-  try { url = new URL(value.trim()); } catch {
+  try { url = new URL(extracted); } catch {
     const error = new Error("链接格式无效");
     error.status = 400;
     error.code = "INVALID_SOURCE_URL";
