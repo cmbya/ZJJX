@@ -1,7 +1,6 @@
 #!/bin/sh
 set -eu
-mkdir -p "$TRIM_PKGETC" "$TRIM_PKGVAR"
-export PATH="/var/apps/nodejs_v22/target/bin:${PATH:-}"
-node "$TRIM_APPDEST/app/server/lib/config.mjs" write
-chmod 700 "$TRIM_PKGETC" "$TRIM_PKGVAR" 2>/dev/null || true
-chmod 600 "$TRIM_PKGETC/config.json" 2>/dev/null || true
+
+# 安装后不执行 Node.js 或访问应用目录，避免运行时依赖尚未就绪时
+# 触发飞牛的“执行脚本出错且原因未知”。首次配置由 config_callback 写入。
+exit 0
