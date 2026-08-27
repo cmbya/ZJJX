@@ -1,4 +1,4 @@
-const HTTP_URL_PATTERN = /https?:\/\/[^\s<>"'“”‘’]+/giu;
+const HTTP_URL_PATTERN = /https?:\/\/[^\s<>"'“”‘’，。！？；：、）】》」』]+/giu;
 const TRAILING_PUNCTUATION = /[),.;!?，。！？；：、）】》」』]+$/u;
 
 function cleanUrl(value) {
