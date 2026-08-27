@@ -1,6 +1,7 @@
 #!/bin/sh
 set -eu
-if [ "${TRIM_SYS_ARCH:-x86_64}" != "x86_64" ] && [ "${TRIM_SYS_ARCH:-x86_64}" != "amd64" ]; then
-  printf '%s\n' "ZJJX 首版仅支持 x86_64/amd64 飞牛设备。" > "${TRIM_TEMP_LOGFILE:-/tmp/zjjx-install.log}"
-  exit 1
-fi
+
+# fnOS 已经会依据 manifest.platform=x86 做平台兼容性检查。
+# 不在这里再次假设 TRIM_SYS_ARCH 的具体字符串，避免把合法的 x86
+# 设备（例如返回 x86 的 J4125 设备）误判为不兼容。
+printf '%s\n' "ZJJX 安装架构：${TRIM_SYS_ARCH:-unknown}" > "${TRIM_TEMP_LOGFILE:-/tmp/zjjx-install.log}"
