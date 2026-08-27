@@ -5,9 +5,9 @@
       "icon": "images/icon_{0}.png",
       "type": "iframe",
       "protocol": "",
-      "gatewayPrefix": "/app/zjjx",
+      "gatewayPrefix": "/app/ZJJX",
       "gatewaySocket": "app.sock",
-      "url": "/app/zjjx",
+      "url": "/app/ZJJX",
       "allUsers": false,
       "control": {
         "accessPerm": "readonly"
