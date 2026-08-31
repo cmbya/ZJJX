@@ -99,12 +99,19 @@ function ensureInside(root, target) {
   if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error("目标路径超出授权目录");
 }
 
-export function buildDownloadDirectory(root, media) {
+function localDate() {
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+export function buildDownloadDirectory(root, media, date = localDate()) {
   const platform = safeSegment(media.platform, "unknown").toLowerCase();
   const username = safeSegment(media.username || media.author, "unknown");
-  const directory = path.join(root, platform, username);
+  const dateSegment = safeSegment(date, "unknown-date");
+  const directory = path.join(root, platform, username, dateSegment);
   ensureInside(root, directory);
-  return { directory, platform, username };
+  return { directory, platform, username, date: dateSegment };
 }
 
 export async function downloadMedia(media, taskId, config, apiEndpoint, onProgress) {
