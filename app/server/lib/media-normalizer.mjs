@@ -106,15 +106,19 @@ export function normalizeMedia(payload, sourceUrl) {
   const displayNameFields = [
     "owner", "remarks", "author", "author_name", "nickname", "display_name", "name",
   ];
+  const platform = stringValue(data, ["platform", "site", "source"], "unknown");
   const author = stringValue(data, displayNameFields, "") ||
     nestedStringValue(data, profileObjectFields, displayNameFields);
-  const username = stringValue(data, stableUsernameFields, "") ||
+  const accountUsername = stringValue(data, stableUsernameFields, "") ||
     nestedStringValue(data, profileObjectFields, stableUsernameFields) ||
     stringValue(data, usernameFields, "") ||
-    nestedStringValue(data, profileObjectFields, usernameFields) ||
-    author;
+    nestedStringValue(data, profileObjectFields, usernameFields);
+  // 抖音目录优先使用主播昵称；昵称缺失时才退回到抖音号。
+  const username = (platform.toLowerCase() === "douyin" || platform === "抖音") && author
+    ? author
+    : accountUsername || author;
   return {
-    platform: stringValue(data, ["platform", "site", "source"], "unknown"),
+    platform,
     author,
     username,
     title: stringValue(data, ["title", "desc", "description", "text"], "未命名内容"),
