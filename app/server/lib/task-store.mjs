@@ -69,6 +69,7 @@ export async function createTask(media, user) {
       userId: user.uid,
       platform: media.platform,
       author: media.author,
+      username: media.username || media.author,
       title: media.title,
       mediaType: media.mediaType,
       count: media.count,

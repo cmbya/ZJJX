@@ -60,6 +60,17 @@ function stringValue(data, fields, fallback = "") {
   return fallback;
 }
 
+function nestedStringValue(data, objectFields, valueFields) {
+  for (const field of objectFields) {
+    const value = data[field];
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      const result = stringValue(value, valueFields, "");
+      if (result) return result;
+    }
+  }
+  return "";
+}
+
 export function normalizeMedia(payload, sourceUrl) {
   const data = unwrap(payload);
   const images = collectImages(data);
@@ -72,9 +83,14 @@ export function normalizeMedia(payload, sourceUrl) {
     error.status = 422;
     throw error;
   }
+  const author = stringValue(data, ["author", "author_name", "nickname", "username"], "");
+  const username = stringValue(data, ["username", "user_name", "author_username", "author_handle", "unique_id"], "") ||
+    nestedStringValue(data, ["user", "author_info", "owner", "creator"], ["username", "user_name", "unique_id", "handle", "nickname", "name"]) ||
+    author;
   return {
     platform: stringValue(data, ["platform", "site", "source"], "unknown"),
-    author: stringValue(data, ["author", "author_name", "nickname", "username"], ""),
+    author,
+    username,
     title: stringValue(data, ["title", "desc", "description", "text"], "未命名内容"),
     thumbnail: validRemoteUrl(toUrl(data.thumbnail || data.cover || data.cover_url)) || "",
     mediaType,

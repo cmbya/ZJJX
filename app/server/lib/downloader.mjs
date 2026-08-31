@@ -99,20 +99,19 @@ function ensureInside(root, target) {
   if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error("目标路径超出授权目录");
 }
 
-function localDate() {
-  const now = new Date();
-  const pad = (value) => String(value).padStart(2, "0");
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+export function buildDownloadDirectory(root, media) {
+  const platform = safeSegment(media.platform, "unknown").toLowerCase();
+  const username = safeSegment(media.username || media.author, "unknown");
+  const directory = path.join(root, platform, username);
+  ensureInside(root, directory);
+  return { directory, platform, username };
 }
 
 export async function downloadMedia(media, taskId, config, apiEndpoint, onProgress) {
   const root = await firstAuthorizedRoot();
   if (!root) throw new Error("没有可用的授权下载目录，请先在飞牛应用设置中授权目录");
-  const date = localDate();
-  const platform = safeSegment(media.platform, "unknown").toLowerCase();
-  const title = safeSegment(media.title, `${platform}-${safeSegment(media.author, "unknown")}-${taskId.slice(0, 6)}`);
-  const directory = path.join(root, date, platform, title);
-  ensureInside(root, directory);
+  const { directory, platform, username } = buildDownloadDirectory(root, media);
+  const title = safeSegment(media.title, `${platform}-${username}-${taskId.slice(0, 6)}`);
   await fs.mkdir(directory, { recursive: true, mode: 0o750 });
   const savedPaths = [];
   let totalBytes = 0;

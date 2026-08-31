@@ -60,6 +60,7 @@ function publicMedia(media) {
   return {
     platform: media.platform,
     author: media.author,
+    username: media.username || media.author,
     title: media.title,
     thumbnail: media.thumbnail,
     mediaType: media.mediaType,

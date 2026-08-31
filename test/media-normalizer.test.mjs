@@ -9,6 +9,17 @@ test("规范化图片组响应", () => {
   assert.equal(media.platform, "instagram");
 });
 
+test("优先使用独立用户名字段", () => {
+  const media = normalizeMedia({ success: true, type: "images", platform: "instagram", author: "显示名称", username: "user_handle", title: "旅行", image_urls: ["https://cdn.example/a.jpg"] }, "https://instagram.com/p/x");
+  assert.equal(media.author, "显示名称");
+  assert.equal(media.username, "user_handle");
+});
+
+test("用户名缺失时回退到作者字段", () => {
+  const media = normalizeMedia({ success: true, type: "images", platform: "instagram", author: "作者", title: "旅行", image_urls: ["https://cdn.example/a.jpg"] }, "https://instagram.com/p/x");
+  assert.equal(media.username, "作者");
+});
+
 test("规范化嵌套视频响应", () => {
   const media = normalizeMedia({ success: true, data: { platform: "douyin", desc: "作品", video_url: "https://cdn.example/video.mp4" } }, "https://v.douyin.com/x");
   assert.equal(media.mediaType, "video");
