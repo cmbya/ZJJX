@@ -428,7 +428,7 @@ media_url
 
 - 平台、用户名和日期均作为独立路径片段；平台和用户名过滤 Windows/NAS 非法字符，平台目录统一使用小写；
 - 日期取 NAS 当前本地日期，格式 `YYYY-MM-DD`；
-- 用户名优先使用解析结果中的 `username`、`user_name`、`author_username`、`author_handle`、`unique_id` 或 `uid` 字段；若接口只返回作者字段，则回退使用作者；抖音解析结果中的 `uid` 对应账号唯一用户名，应优先于作者昵称使用；
+- 用户名优先使用解析结果中的 `unique_id`、`uid`、`userId`、`user_id` 等账号标识，其次使用 `author_username`、`author_handle`、`username` 等字段；抖音直播结果同时兼容嵌套的 `liveInfo.owner`、`liveInfo.remarks`（主播昵称）和 `liveInfo.uid`（抖音号）；若接口只返回昵称，则使用主播昵称；
 - 标题过滤 Windows/NAS 非法字符，并作为文件名；
 - 标题为空时使用 `{平台}-{用户名}-{任务短 ID}`；
 - 路径片段不得包含 `..`、路径分隔符或控制字符；

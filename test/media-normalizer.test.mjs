@@ -26,6 +26,20 @@ test("抖音解析结果优先使用 uid 作为用户名", () => {
   assert.equal(media.username, "real_user_id");
 });
 
+test("抖音直播信息从 liveInfo 获取主播和 uid", () => {
+  const media = normalizeMedia({
+    success: true,
+    type: "video",
+    platform: "douyin",
+    username: "错误的显示名称",
+    liveInfo: { owner: "主播昵称", remarks: "主播昵称", uid: "douyin_account" },
+    title: "直播回放",
+    video_url: "https://cdn.example/live.mp4",
+  }, "https://v.douyin.com/x");
+  assert.equal(media.author, "主播昵称");
+  assert.equal(media.username, "douyin_account");
+});
+
 test("规范化嵌套视频响应", () => {
   const media = normalizeMedia({ success: true, data: { platform: "douyin", desc: "作品", video_url: "https://cdn.example/video.mp4" } }, "https://v.douyin.com/x");
   assert.equal(media.mediaType, "video");

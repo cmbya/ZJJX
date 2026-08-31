@@ -61,11 +61,21 @@ function stringValue(data, fields, fallback = "") {
 }
 
 function nestedStringValue(data, objectFields, valueFields) {
-  for (const field of objectFields) {
-    const value = data[field];
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      const result = stringValue(value, valueFields, "");
-      if (result) return result;
+  const queue = objectFields
+    .map((field) => data?.[field])
+    .filter((value) => value && typeof value === "object" && !Array.isArray(value))
+    .map((value) => ({ value, depth: 0 }));
+
+  while (queue.length) {
+    const { value, depth } = queue.shift();
+    const result = stringValue(value, valueFields, "");
+    if (result) return result;
+    if (depth >= 3) continue;
+    for (const field of objectFields) {
+      const child = value[field];
+      if (child && typeof child === "object" && !Array.isArray(child)) {
+        queue.push({ value: child, depth: depth + 1 });
+      }
     }
   }
   return "";
@@ -83,16 +93,25 @@ export function normalizeMedia(payload, sourceUrl) {
     error.status = 422;
     throw error;
   }
-  const usernameFields = [
-    "username", "user_name", "author_username", "author_handle", "unique_id",
-    "uid", "userId", "user_id", "authorId", "authorID", "handle", "screen_name",
+  const profileObjectFields = [
+    "liveInfo", "live_info", "live", "author", "author_info", "authorInfo", "author_data",
+    "user", "user_info", "userInfo", "owner", "creator",
   ];
-  const author = stringValue(data, ["author", "author_name", "nickname", "username"], "") ||
-    nestedStringValue(data, ["author", "user", "author_info", "owner", "creator"], [
-      "nickname", "name", "display_name", "author", "username",
-    ]);
-  const username = stringValue(data, usernameFields, "") ||
-    nestedStringValue(data, ["author", "user", "author_info", "owner", "creator"], usernameFields) ||
+  const stableUsernameFields = [
+    "unique_id", "uid", "userId", "user_id", "authorId", "authorID", "sec_uid",
+  ];
+  const usernameFields = [
+    "author_username", "author_handle", "handle", "screen_name", "username", "user_name",
+  ];
+  const displayNameFields = [
+    "owner", "remarks", "author", "author_name", "nickname", "display_name", "name",
+  ];
+  const author = stringValue(data, displayNameFields, "") ||
+    nestedStringValue(data, profileObjectFields, displayNameFields);
+  const username = stringValue(data, stableUsernameFields, "") ||
+    nestedStringValue(data, profileObjectFields, stableUsernameFields) ||
+    stringValue(data, usernameFields, "") ||
+    nestedStringValue(data, profileObjectFields, usernameFields) ||
     author;
   return {
     platform: stringValue(data, ["platform", "site", "source"], "unknown"),
