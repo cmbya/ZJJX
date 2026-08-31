@@ -9,10 +9,10 @@ test("规范化图片组响应", () => {
   assert.equal(media.platform, "instagram");
 });
 
-test("优先使用独立用户名字段", () => {
+test("所有平台优先使用显示昵称作为目录名", () => {
   const media = normalizeMedia({ success: true, type: "images", platform: "instagram", author: "显示名称", username: "user_handle", title: "旅行", image_urls: ["https://cdn.example/a.jpg"] }, "https://instagram.com/p/x");
   assert.equal(media.author, "显示名称");
-  assert.equal(media.username, "user_handle");
+  assert.equal(media.username, "显示名称");
 });
 
 test("用户名缺失时回退到作者字段", () => {
@@ -41,7 +41,7 @@ test("抖音直播信息优先使用主播昵称作为目录名", () => {
 });
 
 
-test("抖音昵称缺失时回退到抖音号", () => {
+test("昵称缺失时回退到平台账号", () => {
   const media = normalizeMedia({ success: true, type: "images", platform: "douyin", uid: "real_user_id", title: "旅行", image_urls: ["https://cdn.example/a.jpg"] }, "https://v.douyin.com/x");
   assert.equal(media.username, "real_user_id");
 });
