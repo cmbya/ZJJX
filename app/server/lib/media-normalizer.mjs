@@ -83,9 +83,16 @@ export function normalizeMedia(payload, sourceUrl) {
     error.status = 422;
     throw error;
   }
-  const author = stringValue(data, ["author", "author_name", "nickname", "username"], "");
-  const username = stringValue(data, ["username", "user_name", "author_username", "author_handle", "unique_id"], "") ||
-    nestedStringValue(data, ["user", "author_info", "owner", "creator"], ["username", "user_name", "unique_id", "handle", "nickname", "name"]) ||
+  const usernameFields = [
+    "username", "user_name", "author_username", "author_handle", "unique_id",
+    "uid", "userId", "user_id", "authorId", "authorID", "handle", "screen_name",
+  ];
+  const author = stringValue(data, ["author", "author_name", "nickname", "username"], "") ||
+    nestedStringValue(data, ["author", "user", "author_info", "owner", "creator"], [
+      "nickname", "name", "display_name", "author", "username",
+    ]);
+  const username = stringValue(data, usernameFields, "") ||
+    nestedStringValue(data, ["author", "user", "author_info", "owner", "creator"], usernameFields) ||
     author;
   return {
     platform: stringValue(data, ["platform", "site", "source"], "unknown"),

@@ -20,6 +20,12 @@ test("用户名缺失时回退到作者字段", () => {
   assert.equal(media.username, "作者");
 });
 
+test("抖音解析结果优先使用 uid 作为用户名", () => {
+  const media = normalizeMedia({ success: true, type: "images", platform: "douyin", author: "显示昵称", uid: "real_user_id", title: "旅行", image_urls: ["https://cdn.example/a.jpg"] }, "https://v.douyin.com/x");
+  assert.equal(media.author, "显示昵称");
+  assert.equal(media.username, "real_user_id");
+});
+
 test("规范化嵌套视频响应", () => {
   const media = normalizeMedia({ success: true, data: { platform: "douyin", desc: "作品", video_url: "https://cdn.example/video.mp4" } }, "https://v.douyin.com/x");
   assert.equal(media.mediaType, "video");
