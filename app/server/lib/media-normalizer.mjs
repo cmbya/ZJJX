@@ -113,10 +113,8 @@ export function normalizeMedia(payload, sourceUrl) {
     nestedStringValue(data, profileObjectFields, stableUsernameFields) ||
     stringValue(data, usernameFields, "") ||
     nestedStringValue(data, profileObjectFields, usernameFields);
-  // 抖音目录优先使用主播昵称；昵称缺失时才退回到抖音号。
-  const username = (platform.toLowerCase() === "douyin" || platform === "抖音") && author
-    ? author
-    : accountUsername || author;
+  // 所有平台的目录优先使用内容作者昵称；昵称缺失时才使用账号。
+  const username = author || accountUsername;
   return {
     platform,
     author,
