@@ -20,13 +20,13 @@ test("用户名缺失时回退到作者字段", () => {
   assert.equal(media.username, "作者");
 });
 
-test("抖音解析结果优先使用 uid 作为用户名", () => {
+test("抖音解析结果优先使用主播昵称作为目录名", () => {
   const media = normalizeMedia({ success: true, type: "images", platform: "douyin", author: "显示昵称", uid: "real_user_id", title: "旅行", image_urls: ["https://cdn.example/a.jpg"] }, "https://v.douyin.com/x");
   assert.equal(media.author, "显示昵称");
-  assert.equal(media.username, "real_user_id");
+  assert.equal(media.username, "显示昵称");
 });
 
-test("抖音直播信息从 liveInfo 获取主播和 uid", () => {
+test("抖音直播信息优先使用主播昵称作为目录名", () => {
   const media = normalizeMedia({
     success: true,
     type: "video",
@@ -37,7 +37,13 @@ test("抖音直播信息从 liveInfo 获取主播和 uid", () => {
     video_url: "https://cdn.example/live.mp4",
   }, "https://v.douyin.com/x");
   assert.equal(media.author, "主播昵称");
-  assert.equal(media.username, "douyin_account");
+  assert.equal(media.username, "主播昵称");
+});
+
+
+test("抖音昵称缺失时回退到抖音号", () => {
+  const media = normalizeMedia({ success: true, type: "images", platform: "douyin", uid: "real_user_id", title: "旅行", image_urls: ["https://cdn.example/a.jpg"] }, "https://v.douyin.com/x");
+  assert.equal(media.username, "real_user_id");
 });
 
 test("规范化嵌套视频响应", () => {
